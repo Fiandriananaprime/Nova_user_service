@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@types/node": "^22.20.2",
+    "dotenv": "^17.4.2",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   },
@@ -8,7 +9,9 @@
   "version": "1.0.0",
   "description": "Internal Service for Nova market  user management",
   "main": "index.js",
+  "type": "module",
   "dependencies": {
+    "@prisma/client": "^7.10.0",
     "abstract-logging": "^2.0.1",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
@@ -33,6 +36,7 @@
     "pino": "^10.3.1",
     "pino-abstract-transport": "^3.0.0",
     "pino-std-serializers": "^7.1.0",
+    "prisma": "^7.10.0",
     "process-warning": "^5.1.0",
     "quick-format-unescaped": "^4.0.4",
     "real-require": "^0.2.0",
@@ -52,7 +56,13 @@
     "undici-types": "^6.21.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
   },
   "repository": {
     "type": "git",
