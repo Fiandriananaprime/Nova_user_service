@@ -2,6 +2,12 @@ import { prisma } from "../database/prisma.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
 
 export class UserRepository {
+
+    async findById(id:string){
+        return prisma.user.findUnique({
+            where:{id}
+        })
+    }
     async findByEmail(email: string){
         return prisma.user.findUnique({
             where:{email}

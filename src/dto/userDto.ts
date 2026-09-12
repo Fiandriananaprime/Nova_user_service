@@ -3,3 +3,4 @@ export interface CreateUserDTO {
     lastName: string;
     email: string;
 }
+export type { User } from "@Fiandriananaprime/nova_api_type"
