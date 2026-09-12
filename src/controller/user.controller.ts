@@ -23,6 +23,7 @@ export class UserController {
                     }
                 })
             }
+            request.log.error(error, "Failed to create user")
             return reply.status(500).send({
                 error:{
                     code:"INTERNAL_SERVER_ERROR",

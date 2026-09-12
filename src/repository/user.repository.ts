@@ -1,4 +1,6 @@
 import { prisma } from "../database/prisma.js";
+import { Prisma } from "../generated/prisma/index.js";
+
 import type { CreateUserDTO, updateRequest } from "../dto/userDto.js";
 
 export class UserRepository {
@@ -14,16 +16,19 @@ export class UserRepository {
         })
     }
 
-    async createUser(data:CreateUserDTO){
+    async createUser(
+        tx: Prisma.TransactionClient,
+        data: CreateUserDTO
+    ) {
         const { firstName, lastName, email } = data;
 
-        return prisma.user.create({
+        return tx.user.create({
             data: {
                 firstName,
                 lastName,
                 email,
             },
-        })
+        });
     }
 
     async updateById(id:string,data:updateRequest){
@@ -32,4 +37,5 @@ export class UserRepository {
             data
         })
     }
+
 }

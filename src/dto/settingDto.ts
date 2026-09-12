@@ -1,0 +1,1 @@
+export type { PrivacySettings as privacyDto} from "@Fiandriananaprime/nova_api_type"

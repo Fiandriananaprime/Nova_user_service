@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 
 import { UserRepository } from "./repository/user.repository.js";
+import { PrivacyRepository } from "./repository/privacy.repository.js";
 
 import { AccountService } from "./service/account.service.js";
 import { UserService } from "./service/user.service.js";
@@ -15,10 +16,11 @@ export const routes = (app: FastifyInstance) => {
 
     // Dependencies
     const userRepository = new UserRepository();
+    const privacyRepository = new PrivacyRepository();
 
     // Services
-    const accountService = new AccountService(userRepository);
-    const userService = new UserService(userRepository);
+    const accountService = new AccountService(userRepository,privacyRepository);
+    const userService = new UserService(userRepository, privacyRepository);
 
     // Controllers
     const accountController = new AccountController(accountService);
