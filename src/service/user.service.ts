@@ -1,6 +1,7 @@
 
 import { prisma } from "../database/prisma.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
+import { UserAlreadyExists } from "../errorHandler/UserError.js";
 import type { PrivacyRepository } from "../repository/privacy.repository.js";
 import { UserRepository } from "../repository/user.repository.js";
 
@@ -14,7 +15,7 @@ export class UserService {
         const existingUser = await this.UserRepository.findByEmail(data.email);
 
         if(existingUser){
-            throw new Error("USER_ALREADY_EXISTS");
+            throw new UserAlreadyExists;
         }
 
         return prisma.$transaction(async (tx) =>{
