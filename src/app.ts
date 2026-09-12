@@ -9,6 +9,20 @@ routes(app)
 app.setErrorHandler((error, request, reply) => {
   request.log.error(error);
 
+   if (
+    typeof error === "object" &&
+    error !== null &&
+    "validation" in error
+  ) {
+    return reply.status(400).send({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Request validation failed.",
+        details: error.validation,
+      },
+    });
+  }
+  
   if (error instanceof AppError) {
     return reply.status(error.statusCode).send({
       error: {
