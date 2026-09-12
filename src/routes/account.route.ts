@@ -8,6 +8,7 @@ export const accountRoutes =  (
     options: { prefix: string },
 ) => {
     app.register((router) => {
-        router.get("/account/:id", accountController.findAccountById.bind(accountController));
+        router.get("/account/profile/:id", accountController.findAccountById.bind(accountController));
+        router.patch("/account/profile/:id", accountController.updateById.bind(accountController))
     }, options);
 }

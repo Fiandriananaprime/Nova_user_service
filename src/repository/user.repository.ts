@@ -1,5 +1,5 @@
 import { prisma } from "../database/prisma.js";
-import type { CreateUserDTO } from "../dto/userDto.js";
+import type { CreateUserDTO, updateRequest } from "../dto/userDto.js";
 
 export class UserRepository {
 
@@ -23,6 +23,13 @@ export class UserRepository {
                 lastName,
                 email,
             },
+        })
+    }
+
+    async updateById(id:string,data:updateRequest){
+        return prisma.user.update({
+            where:{ id },
+            data
         })
     }
 }

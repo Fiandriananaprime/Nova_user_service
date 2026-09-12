@@ -14,6 +14,8 @@ const start = async () => {
         app.log.error(error);
         process.exit(1);
     }
+
+    console.log("Server Listening on port :" + PORT)
 };
 
 process.on("unhandledRejection", (error) => {
