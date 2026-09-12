@@ -1,8 +1,290 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  output = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum AdminRole {
+  super_admin
+  admin
+  moderator
+  delivery
+
+  @@map("admin_role")
+}
+
+enum DeliveryMethod {
+  standard
+  express
+  pickup
+
+  @@map("delivery_method")
+}
+
+enum Language {
+  mg
+  fr
+  en
+
+  @@map("language")
+}
+
+enum ProfileVisibility {
+  private
+  public
+
+  @@map("profile_visibility")
+}
+
+enum Theme {
+  light
+  dark
+  system
+
+  @@map("theme")
+}
+
+enum UserRole {
+  buyer
+  seller
+  admin
+
+  @@map("user_role")
+}
+
+enum UserStatus {
+  active
+  suspended
+
+  @@map("user_status")
+}
+
+model User {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName String     @map("first_name") @db.VarChar(100)
+  lastName  String     @map("last_name") @db.VarChar(100)
+  email     String     @unique @db.VarChar(255)
+  phone     String?    @unique @db.VarChar(30)
+  role      UserRole   @default(buyer)
+  status    UserStatus @default(active)
+  adminRole AdminRole? @map("admin_role")
+  avatarUrl String?    @map("avatar_url")
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  adminNotificationPreferences  AdminNotificationPreferences?
+  adminSettings                 AdminSettings?
+  buyerFavoriteCategories       BuyerFavoriteCategory[]
+  buyerNotificationPreferences  BuyerNotificationPreferences?
+  buyerPreferences              BuyerPreferences?
+  consentSettings               ConsentSettings?
+  favoriteProducts              FavoriteProduct[]
+  followedStores                FollowedStore[]
+  privacySettings               PrivacySettings?
+  sellerNotificationPreferences SellerNotificationPreferences?
+  sellerSettings                SellerSettings?
+  addresses                     UserAddress[]
+
+  @@index(role, map: "idx_users_role")
+  @@index(status, map: "idx_users_status")
+  @@map("users")
+}
+
+model AdminNotificationPreferences {
+  userId             String   @id @map("user_id") @db.Uuid
+  sellerApplications Boolean  @default(true) @map("seller_applications")
+  productModeration  Boolean  @default(true) @map("product_moderation")
+  paymentFailures    Boolean  @default(true) @map("payment_failures")
+  fraudAlerts        Boolean  @default(true) @map("fraud_alerts")
+  systemAlerts       Boolean  @default(true) @map("system_alerts")
+  userReports        Boolean  @default(true) @map("user_reports")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_notification_preferences")
+}
+
+model AdminSettings {
+  userId             String   @id @map("user_id") @db.Uuid
+  theme              Theme    @default(system)
+  language           Language @default(fr)
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  pushNotifications  Boolean  @default(true) @map("push_notifications")
+  securityAlerts     Boolean  @default(true) @map("security_alerts")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_settings")
+}
+
+model BuyerFavoriteCategory {
+  userId     String   @map("user_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, categoryId])
+  @@index(categoryId, map: "idx_buyer_favorite_categories_category")
+  @@map("buyer_favorite_categories")
+}
+
+model BuyerNotificationPreferences {
+  userId          String   @id @map("user_id") @db.Uuid
+  orderCreated    Boolean  @default(true) @map("order_created")
+  orderDelivered  Boolean  @default(true) @map("order_delivered")
+  orderPending    Boolean  @default(true) @map("order_pending")
+  orderCancelled  Boolean  @default(true) @map("order_cancelled")
+  payment         Boolean  @default(true)
+  promotions      Boolean  @default(true)
+  priceDrops      Boolean  @default(true) @map("price_drops")
+  backInStock     Boolean  @default(true) @map("back_in_stock")
+  newProducts     Boolean  @default(false) @map("new_products")
+  followedStores  Boolean  @default(false) @map("followed_stores")
+  reviews         Boolean  @default(true)
+  recommendations Boolean  @default(true)
+  email           Boolean  @default(false)
+  push            Boolean  @default(true)
+  sms             Boolean  @default(false)
+  frequency       String   @default("monthly") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("buyer_notification_preferences")
+}
+
+model BuyerPreferences {
+  userId                      String         @id @map("user_id") @db.Uuid
+  theme                       Theme          @default(system)
+  language                    Language       @default(fr)
+  preferredDeliveryMethod     DeliveryMethod @default(standard) @map("preferred_delivery_method")
+  personalizedRecommendations Boolean        @default(true) @map("personalized_recommendations")
+  showRecentlyViewed          Boolean        @default(true) @map("show_recently_viewed")
+  createdAt                   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("buyer_preferences")
+}
+
+model ConsentSettings {
+  userId          String   @id @map("user_id") @db.Uuid
+  marketing       Boolean  @default(false)
+  analytics       Boolean  @default(false)
+  personalization Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("consent_settings")
+}
+
+model FavoriteProduct {
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+  @@index(productId, map: "idx_favorite_products_product")
+  @@index(userId, map: "idx_favorite_products_user")
+  @@map("favorite_products")
+}
+
+model FollowedStore {
+  userId    String   @map("user_id") @db.Uuid
+  storeId   String   @map("store_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, storeId])
+  @@index(storeId, map: "idx_followed_stores_store")
+  @@index(userId, map: "idx_followed_stores_user")
+  @@map("followed_stores")
+}
+
+model PrivacySettings {
+  userId                  String            @id @map("user_id") @db.Uuid
+  profileVisibility       ProfileVisibility @default(private) @map("profile_visibility")
+  activityPersonalization Boolean           @default(true) @map("activity_personalization")
+  analyticsConsent        Boolean           @default(false) @map("analytics_consent")
+  marketingConsent        Boolean           @default(false) @map("marketing_consent")
+  dataSharing             Boolean           @default(false) @map("data_sharing")
+  createdAt               DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("privacy_settings")
+}
+
+model SellerNotificationPreferences {
+  userId              String   @id @map("user_id") @db.Uuid
+  newOrder            Boolean  @default(true) @map("new_order")
+  orderCancelled      Boolean  @default(true) @map("order_cancelled")
+  lowStock            Boolean  @default(true) @map("low_stock")
+  productApproved     Boolean  @default(true) @map("product_approved")
+  productRejected     Boolean  @default(true) @map("product_rejected")
+  newReview           Boolean  @default(true) @map("new_review")
+  payout              Boolean  @default(true)
+  sellerAnnouncements Boolean  @default(true) @map("seller_announcements")
+  email               Boolean  @default(true)
+  push                Boolean  @default(true)
+  sms                 Boolean  @default(false)
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("seller_notification_preferences")
+}
+
+model SellerSettings {
+  userId    String   @id @map("user_id") @db.Uuid
+  theme     Theme    @default(system)
+  language  Language @default(fr)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("seller_settings")
+}
+
+model UserAddress {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  label         String   @db.VarChar(100)
+  recipientName String   @map("recipient_name") @db.VarChar(200)
+  phone         String   @db.VarChar(30)
+  street        String
+  district      String?  @db.VarChar(150)
+  city          String   @db.VarChar(150)
+  region        String?  @db.VarChar(150)
+  postalCode    String?  @map("postal_code") @db.VarChar(20)
+  latitude      Float?   @db.DoublePrecision
+  longitude     Float?   @db.DoublePrecision
+  instructions  String?
+  isDefault     Boolean  @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isDefault], map: "idx_user_addresses_user_default")
+  @@index(userId, map: "idx_user_addresses_user_id")
+  @@map("user_addresses")
 }
