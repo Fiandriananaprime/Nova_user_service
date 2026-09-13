@@ -13,6 +13,7 @@ const start = async () => {
 
         console.log("Service running at: " + address)
     } catch (error) {
+        console.error(`Service failed to start on port ${PORT}:`, error);
         app.log.error(error);
         process.exit(1);
     }

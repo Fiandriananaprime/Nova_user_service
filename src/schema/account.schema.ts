@@ -2,13 +2,20 @@ export const accountPrivacy = {
     type: "object",
     properties:{
         profileVisibility: {type: "string"},
-        activityPersonalization :{type: "boolean"},
-        analyticsConsent: {type: "boolean"},
-        marketingConsent: { type: "boolean"},
         dataSharing: {type: "boolean"}
     },
     additionalProperties:false
 } as const 
+
+export const consentSetting = {
+    type: "object",
+    properties:{
+        marketings: {type: "boolean"},
+        analytics: {type: "boolean"},
+        personnalization: {type: "boolean"}
+    },
+    additionalProperties: false
+} as const
 
 export const updateProfile = {
     type: "object",

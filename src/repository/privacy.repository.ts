@@ -3,6 +3,7 @@ import { Prisma } from "../generated/prisma/index.js";
 import type { privacyDto } from "../dto/settingDto.js";
 
 export class PrivacyRepository {
+    
     async create(
         tx: Prisma.TransactionClient,
         userId: string,
