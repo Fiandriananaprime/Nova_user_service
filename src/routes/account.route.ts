@@ -10,7 +10,7 @@ export const accountRoutes =  (
 ) => {
     app.register((router) => {
         router.get("/account/profile/:id", accountController.findAccountById.bind(accountController));
-        router.patch("/account/:id",{schema:{body:{updateProfile}}}, accountController.updateById.bind(accountController))
-        router.put("/account/privacy/:id",{schema:{body:{accountPrivacy}}}, accountController.updatePrivacyById.bind(accountController))
+        router.patch("/account/:id",{schema:{body:updateProfile}}, accountController.updateById.bind(accountController))
+        router.put("/account/privacy/:id",{schema:{body:accountPrivacy}}, accountController.updatePrivacyById.bind(accountController))
     }, options);
 }

@@ -7,6 +7,6 @@ export const internalRoutes = async (
     options: { prefix: string },
 ) => {
     app.register((router) => {
-        router.post("/users",{schema:{body:{createUserSchema}}}, userController.createUser.bind(userController));
+        router.post("/users",{schema:{body:createUserSchema}}, userController.createUser.bind(userController));
     }, options);
 }

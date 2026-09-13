@@ -6,16 +6,18 @@ const PORT = Number(process.env["PORT"]) || 3001;
 
 const start = async () => {
     try {
-        await app.listen({
+       const address =  await app.listen({
             port: PORT,
             host: "0.0.0.0",
         });
+
+        console.log("Service running at: " + address)
     } catch (error) {
         app.log.error(error);
         process.exit(1);
     }
 
-    console.log("Server Listening on port :" + PORT)
+    
 };
 
 process.on("unhandledRejection", (error) => {
