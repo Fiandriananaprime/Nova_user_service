@@ -19,6 +19,8 @@ export class AccountService {
 
     async findAccountConsentById(id:string){
         const consent = await this.ConsentRepository.findByUserId(id);
+        if(!consent)   throw new UserNotFoundError()
+
         return consent
     }
 
