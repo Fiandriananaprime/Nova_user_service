@@ -13,5 +13,6 @@ export const accountRoutes =  (
         router.patch("/account/:id",{schema:{body:updateProfile}}, accountController.updateById.bind(accountController))
         router.put("/account/privacy/:id",{schema:{body:accountPrivacy}}, accountController.updatePrivacyById.bind(accountController))
         router.get("/account/consent/:id",accountController.findAccountConsentById.bind(accountController))
+        router.patch("/account/consent/:id",accountController.updateConsentById.bind(accountController))
     }, options);
 }

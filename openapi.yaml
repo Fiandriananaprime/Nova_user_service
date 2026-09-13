@@ -176,12 +176,6 @@ components:
             profileVisibility:
               type: string
               enum: [private, public]
-            activityPersonalization:
-              type: boolean
-            analyticsConsent:
-              type: boolean
-            marketingConsent:
-              type: boolean
             dataSharing:
               type: boolean
             createdAt:
@@ -208,6 +202,12 @@ components:
               type: boolean
             personnalisation:
               type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt: 
+              type: string
+              format: date-time
 
     HealthResponse:
       type: object
@@ -458,6 +458,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsentSettingsResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+    patch:
+      tags: [Account]
+      summary: Modidfy user consent settings
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Updated user Consent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentSettingsResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/NotFoundError'
         '500':

@@ -1,4 +1,4 @@
-import type { privacyDto } from "../dto/settingDto.js";
+import type { privacyDto, consentDto } from "../dto/settingDto.js";
 import type { updateRequest } from "../dto/userDto.js";
 import { UserNotFoundError } from "../errorHandler/UserError.js";
 import type { ConsentRepository } from "../repository/consent.repository.js";
@@ -17,6 +17,7 @@ export class AccountService {
         return user
     }
 
+    // CONSENT
     async findAccountConsentById(id:string){
         const consent = await this.ConsentRepository.findByUserId(id);
         if(!consent)   throw new UserNotFoundError()
@@ -24,6 +25,14 @@ export class AccountService {
         return consent
     }
 
+    async updateConsent(id:string,data:consentDto){
+        const consent = await this.ConsentRepository.updateByUserId(id,data);
+        if(!consent) throw new UserNotFoundError()
+
+        return consent
+    }
+
+    // ACCOUNT
     async updateById(id:string,data:updateRequest){
         const existingUser = await this.UserRepository.findById(id);
 
@@ -34,6 +43,7 @@ export class AccountService {
         return user;
     }
 
+    // PRIVACY
     async updatePrivacy(id:string,data:privacyDto){
         const existingUser = await this.UserRepository.findById(id);
 
@@ -44,10 +54,4 @@ export class AccountService {
         return user;
     }
 
-    async findConsentByUserId(userId:string){
-        const existingUser = await this.ConsentRepository.findByUserId(userId);
-        if(!existingUser) throw new UserNotFoundError;
-
-        return existingUser;
-    }
 }
