@@ -162,6 +162,24 @@ components:
         data:
           $ref: '#/components/schemas/User'
 
+    UserAddress:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        label: { type: string, maxLength: 100 }
+        recipientName: { type: string, maxLength: 200 }
+        phone: { type: string, maxLength: 30 }
+        street: { type: string }
+        district: { type: string, maxLength: 150 }
+        city: { type: string, maxLength: 150 }
+        region: { type: string, maxLength: 150 }
+        postalCode: { type: string, maxLength: 20 }
+        latitude: { type: number, format: double, nullable: true }
+        longitude: { type: number, format: double, nullable: true }
+        instructions: { type: string }
+        isDefault: { type: boolean }
+      required: [id, label, recipientName, phone, street, district, city, region, postalCode, instructions, isDefault]
+
     PrivacySettingsResponse:
       type: object
       required: [data]
@@ -370,6 +388,30 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           $ref: '#/components/responses/InternalError'
+
+  /internal/addresses:
+    get:
+      tags: [Internal]
+      summary: Get user addresses
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User addresses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserAddress'
+        '404':
+          description: User not found
 
   /api/account/profile/{id}:
     get:

@@ -12,8 +12,8 @@ export class UserController {
             return reply.status(201).send(user)
     }
 
-    async findUserAddresses(request: FastifyRequest<{Params:{userId: string}}>, reply:FastifyReply){
-        const userId = request.params.userId
+    async findUserAddresses(request: FastifyRequest<{Querystring:{userId: string}}>, reply:FastifyReply){
+        const userId = request.query.userId
         const addresses = await this.UserService.findAddressesByUserId(userId)
 
         return reply.status(200).send(addresses)
