@@ -2,6 +2,8 @@ import { prisma } from "../database/prisma.js";
 import { Prisma } from "../generated/prisma/index.js";
 
 import type { CreateUserDTO, updateRequest } from "../dto/userDto.js";
+import type { userAddress } from "../type/user.js";
+
 
 export class UserRepository {
 
@@ -38,4 +40,27 @@ export class UserRepository {
         })
     }
 
+    async getAddresses(userId: string): Promise<{ address: userAddress[] }> {
+        const addresses = await prisma.userAddress.findMany({
+          where: { userId },
+        });
+
+      return {
+        address: addresses.map((address) => ({
+            id: address.id,
+            label: address.label,
+            recipientName: address.recipientName,
+            phone: address.phone,
+            street: address.street,
+            district: address.district,
+            city: address.city,
+            region: address.region,
+            postalCode: address.postalCode,
+            latitude: address.latitude,
+            longitude: address.longitude,
+            instructions: address.instructions,
+            isDefault: address.isDefault,
+        })),
+      };
+    }
 }

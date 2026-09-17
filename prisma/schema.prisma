@@ -271,7 +271,7 @@ model UserAddress {
   recipientName String   @map("recipient_name") @db.VarChar(200)
   phone         String   @db.VarChar(30)
   street        String
-  district      String?  @db.VarChar(150)
+  district      String  @db.VarChar(150)
   city          String   @db.VarChar(150)
   region        String?  @db.VarChar(150)
   postalCode    String?  @map("postal_code") @db.VarChar(20)

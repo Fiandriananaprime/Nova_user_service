@@ -9,8 +9,13 @@ export class UserController {
     async createUser(request:FastifyRequest<{ Body: CreateUserDTO}>,reply:FastifyReply){
             const user = await this.UserService.createUser(request.body);
 
-            return reply.status(201).send({
-                data:user
-            })
+            return reply.status(201).send(user)
+    }
+
+    async findUserAddresses(request: FastifyRequest<{Params:{userId: string}}>, reply:FastifyReply){
+        const userId = request.params.userId
+        const addresses = await this.UserService.findAddressesByUserId(userId)
+
+        return reply.status(200).send(addresses)
     }
 }

@@ -1,7 +1,7 @@
 
 import { prisma } from "../database/prisma.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
-import { UserAlreadyExists } from "../errorHandler/UserError.js";
+import { UserAlreadyExists, UserNotFoundError } from "../errorHandler/UserError.js";
 
 import { UserRepository } from "../repository/user.repository.js";
 import type { ConsentRepository } from "../repository/consent.repository.js";
@@ -36,5 +36,13 @@ export class UserService {
                 status: user.status
             }
         })
+    }
+
+    async findAddressesByUserId(userId: string){
+        const user = this.UserRepository.findById(userId);
+        if(!user) throw new UserNotFoundError();
+
+        const addresses = this.UserRepository.getAddresses(userId);
+        return addresses
     }
 }
