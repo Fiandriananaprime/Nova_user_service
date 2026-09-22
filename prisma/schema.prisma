@@ -82,7 +82,6 @@ model User {
   buyerPreferences              BuyerPreferences?
   consentSettings               ConsentSettings?
   favoriteProducts              FavoriteProduct[]
-  followedStores                FollowedStore[]
   privacySettings               PrivacySettings?
   sellerNotificationPreferences SellerNotificationPreferences?
   sellerSettings                SellerSettings?
@@ -201,19 +200,6 @@ model FavoriteProduct {
   @@index(productId, map: "idx_favorite_products_product")
   @@index(userId, map: "idx_favorite_products_user")
   @@map("favorite_products")
-}
-
-model FollowedStore {
-  userId    String   @map("user_id") @db.Uuid
-  storeId   String   @map("store_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([userId, storeId])
-  @@index(storeId, map: "idx_followed_stores_store")
-  @@index(userId, map: "idx_followed_stores_user")
-  @@map("followed_stores")
 }
 
 model PrivacySettings {
