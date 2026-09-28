@@ -25,20 +25,20 @@ export interface NotificationPrefs {
   frequency: NotificationFrequency;
 }
 
-export interface BuyerProfile {
+export interface BuyerProfile extends BuyerPreferences {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   role: string;
   status: string;
+}
 
+export interface BuyerPreferences {
   theme?: Theme;
   lang?: Lang;
-
-  favoriteCategories: string[];
-
   preferredDeliveryMethod?: DeliveryMethod;
+  favoriteCategories: string[];
   personalizedRecommendations?: boolean;
   showRecentlyViewed?: boolean;
 
