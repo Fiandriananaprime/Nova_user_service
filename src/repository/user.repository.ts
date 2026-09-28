@@ -3,6 +3,7 @@ import { Prisma } from "../generated/prisma/index.js";
 
 import type { CreateUserDTO, updateRequest } from "../dto/userDto.js";
 import type { CreateAddress, UpdateAddress, userAddress } from "../type/user.js";
+import { AddressNotFound } from "../errorHandler/UserError.js";
 
 
 export class UserRepository {
@@ -87,18 +88,15 @@ export class UserRepository {
 
     }
     async updateAddress(id: string, userId: string, body: UpdateAddress):Promise<userAddress | null>{
-        const result = await prisma.userAddress.updateMany({
-            where:{id,userId},
-            data: body
-        })
-
-        if(result.count === 0) return null
-        
-        return prisma.userAddress.findUniqueOrThrow({
-            where: { id }
+        const [address] = await prisma.userAddress.updateManyAndReturn({
+          where: { id, userId },
+          data: body
         });
+        if (!address) return null
+            
+        return address;
     }
-    
+
     async deleteAddress(id:string, userId: string){
         return prisma.userAddress.deleteMany({where:{id,userId}})
     }
