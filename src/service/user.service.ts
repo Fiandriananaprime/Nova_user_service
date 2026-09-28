@@ -1,11 +1,12 @@
 
 import { prisma } from "../database/prisma.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
-import { UserAlreadyExists, UserNotFoundError } from "../errorHandler/UserError.js";
+import { AddressNotFound, UserAlreadyExists, UserNotFoundError } from "../errorHandler/UserError.js";
 
 import { UserRepository } from "../repository/user.repository.js";
 import type { ConsentRepository } from "../repository/consent.repository.js";
 import type { PrivacyRepository } from "../repository/privacy.repository.js";
+import type { CreateAddress, UpdateAddress, userAddress } from "../type/user.js";
 
 export class UserService {
     constructor ( 
@@ -44,5 +45,32 @@ export class UserService {
 
         const addresses = this.UserRepository.getAddresses(userId);
         return addresses
+    }
+
+    async addUserAddress(userId: string,address: CreateAddress): Promise<userAddress>{
+        const userExist = await this.UserRepository.findById(userId)
+        if(!userExist) throw new UserNotFoundError()
+        
+        const createdAddress = this.UserRepository.addUserAddress(userId,address);
+        
+        return createdAddress
+    }
+
+    async updateUserAddress(id: string,userId: string, body:UpdateAddress):Promise<userAddress>{
+        const address = await this.UserRepository.updateAddress(id,userId,body);
+        if(!address) throw new AddressNotFound()
+        return address
+    }
+
+    async deleteAddress(id:string, userId:string){
+        const result = await this.UserRepository.deleteAddress(id,userId)
+
+        if(result.count === 0) throw new AddressNotFound()
+    }
+
+    async setAddressDefault(id: string, userId: string){
+         const address = await this.UserRepository.setDefaultAddress(id, userId);
+
+        if (!address) throw new AddressNotFound()
     }
 }

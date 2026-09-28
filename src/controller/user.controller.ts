@@ -2,6 +2,8 @@ import type {FastifyReply, FastifyRequest} from "fastify";
 
 import { UserService } from "../service/user.service.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
+import { UnauthorizedError } from "../errorHandler/CredentialError.js";
+import type { CreateAddress,UpdateAddress } from "../type/user.js";
 
 export class UserController {
     constructor ( private readonly UserService: UserService){}
@@ -17,5 +19,44 @@ export class UserController {
         const addresses = await this.UserService.findAddressesByUserId(userId)
 
         return reply.status(200).send(addresses)
+    }
+
+    async addUserAddress(request: FastifyRequest<{Body: CreateAddress}>,reply: FastifyReply){
+        const userId = request.userId
+        const address = request.body;
+        if (!userId) throw new UnauthorizedError();
+
+        const createadAddress = await this.UserService.addUserAddress(userId,address);
+
+        return reply.status(201).send(createadAddress)
+    }
+
+    async updateUserAddress(request: FastifyRequest<{Body: UpdateAddress,Params:{id:string}}>,reply: FastifyReply){
+        const body = request.body
+        const addressId = request.params.id
+        const userId = request.userId
+        if(!userId) throw new UnauthorizedError()
+
+        const updatedAddress = await this.UserService.updateUserAddress(addressId,userId,body)
+
+        return updatedAddress
+    }
+
+    async deleteAddress(request:FastifyRequest<{Params:{id: string}}>,reply: FastifyReply){
+        const userId = request.userId;
+        if(!userId) throw new UnauthorizedError()
+        await this.UserService.deleteAddress(request.params.id,userId);
+
+        return reply.status(204)
+    }
+
+    async setAddressDefault(request: FastifyRequest<{Params:{id:string}}>, reply: FastifyReply){
+        const userId = request.userId;
+        const id = request.params.id
+        if(!userId) throw new UnauthorizedError()
+
+        await this.UserService.setAddressDefault(id,userId)
+
+        return reply.status(204)
     }
 }

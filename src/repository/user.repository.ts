@@ -2,8 +2,7 @@ import { prisma } from "../database/prisma.js";
 import { Prisma } from "../generated/prisma/index.js";
 
 import type { CreateUserDTO, updateRequest } from "../dto/userDto.js";
-import type { userAddress } from "../type/user.js";
-
+import type { CreateAddress, UpdateAddress, userAddress } from "../type/user.js";
 
 export class UserRepository {
 
@@ -62,5 +61,61 @@ export class UserRepository {
             isDefault: address.isDefault,
         })),
       };
+    }
+
+    async addUserAddress(userId: string,body:CreateAddress): Promise<userAddress>{
+        const address = await prisma.userAddress.create({
+            data: {
+                userId,
+                label: body.label,
+                recipientName: body.recipientName,
+                phone: body.phone,
+                street: body.street,
+                district: body.district,
+                city: body.city,
+                region: body.region,
+                postalCode: body.postalCode,
+                latitude: body.latitude ?? null,
+                longitude: body.longitude ?? null,
+                instructions: body.instructions,
+                isDefault: body.isDefault ?? false,
+            },
+            });
+
+        return address
+
+    }
+    async updateAddress(id: string, userId: string, body: UpdateAddress):Promise<userAddress | null>{
+        const [address] = await prisma.userAddress.updateManyAndReturn({
+          where: { id, userId },
+          data: body
+        });
+        if (!address) return null
+            
+        return address;
+    }
+
+    async deleteAddress(id:string, userId: string){
+        return prisma.userAddress.deleteMany({where:{id,userId}})
+    }
+
+    async setDefaultAddress(id: string, userId: string) {
+        return prisma.$transaction(async (tx) => {
+            const address = await tx.userAddress.findFirst({
+            where: { id, userId },
+            });
+
+            if (!address) return null
+
+            await tx.userAddress.updateMany({
+            where: { userId, id: { not: id } },
+            data: { isDefault: false },
+            });
+
+            return tx.userAddress.update({
+            where: { id },
+            data: { isDefault: true },
+            });
+        });
     }
 }
