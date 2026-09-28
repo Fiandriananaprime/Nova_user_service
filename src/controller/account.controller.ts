@@ -21,7 +21,6 @@ export class AccountController {
             return reply.status(200).send({data:account});
     }
     
-    //Consent
     async findAccountConsentById(request:FastifyRequest<{Params:{id:string}}>, reply: FastifyReply) {
                 const privacy = await this.AccountService.findAccountConsentById(request.params.id);
 
