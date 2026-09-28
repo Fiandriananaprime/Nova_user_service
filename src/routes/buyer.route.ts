@@ -15,5 +15,6 @@ export const buyerRoutes = async (
         router.post("/addresses",{schema: {body: createAddress}}, userController.addUserAddress.bind(userController))
         router.patch("/addresses/:id",{schema: {body: updateAddress}}, userController.updateUserAddress.bind(userController))
         router.delete<{Params:{id:string}}>("/addresses/:id",userController.deleteAddress.bind(userController))
+        router.patch("/addresses/:id/default",userController.setAddressDefault.bind(userController))
     }, options);
 }

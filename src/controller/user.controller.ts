@@ -49,4 +49,14 @@ export class UserController {
 
         return reply.status(204)
     }
+
+    async setAddressDefault(request: FastifyRequest<{Params:{id:string}}>, reply: FastifyReply){
+        const userId = request.userId;
+        const id = request.params.id
+        if(!userId) throw new UnauthorizedError()
+
+        await this.UserService.setAddressDefault(id,userId)
+
+        return reply.status(204)
+    }
 }

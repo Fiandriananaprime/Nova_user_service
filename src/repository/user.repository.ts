@@ -3,8 +3,6 @@ import { Prisma } from "../generated/prisma/index.js";
 
 import type { CreateUserDTO, updateRequest } from "../dto/userDto.js";
 import type { CreateAddress, UpdateAddress, userAddress } from "../type/user.js";
-import { AddressNotFound } from "../errorHandler/UserError.js";
-
 
 export class UserRepository {
 
@@ -99,5 +97,25 @@ export class UserRepository {
 
     async deleteAddress(id:string, userId: string){
         return prisma.userAddress.deleteMany({where:{id,userId}})
+    }
+
+    async setDefaultAddress(id: string, userId: string) {
+        return prisma.$transaction(async (tx) => {
+            const address = await tx.userAddress.findFirst({
+            where: { id, userId },
+            });
+
+            if (!address) return null
+
+            await tx.userAddress.updateMany({
+            where: { userId, id: { not: id } },
+            data: { isDefault: false },
+            });
+
+            return tx.userAddress.update({
+            where: { id },
+            data: { isDefault: true },
+            });
+        });
     }
 }

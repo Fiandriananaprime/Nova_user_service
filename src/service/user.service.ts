@@ -67,4 +67,10 @@ export class UserService {
 
         if(result.count === 0) throw new AddressNotFound()
     }
+
+    async setAddressDefault(id: string, userId: string){
+         const address = await this.UserRepository.setDefaultAddress(id, userId);
+
+        if (!address) throw new AddressNotFound()
+    }
 }
