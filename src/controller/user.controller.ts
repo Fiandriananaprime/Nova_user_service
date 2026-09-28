@@ -39,7 +39,7 @@ export class UserController {
 
         const updatedAddress = await this.UserService.updateUserAddress(addressId,userId,body)
 
-        return updatedAddress
+        return reply.status(200).send(updatedAddress)
     }
 
     async deleteAddress(request:FastifyRequest<{Params:{id: string}}>,reply: FastifyReply){
