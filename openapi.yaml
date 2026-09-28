@@ -1,0 +1,530 @@
+openapi: 3.0.3
+info:
+  title: User Service
+  description: User Service for internal-access-only with nova api gateway
+  version: 1.0.0
+servers:
+  - url: http://user.novamarket.mg/v1
+    description: api path for communication with gateway
+
+tags:
+  - name: User
+    description: All manipulation for basic user only
+  - name: Account
+    description: Accessing full user data including all Schema
+  - name: System
+    description: Service health and metadata endpoints
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: User UUID
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+    NotFoundError:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    CreateUserRequest:
+      type: object
+      additionalProperties: false
+      required: [firstName, lastName, email]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+
+    UpdateProfileRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        avatarUrl:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+    PrivacySettingsRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        profileVisibility:
+          type: string
+          enum: [private, public]
+        dataSharing:
+          type: boolean
+
+    User:
+      type: object
+      required: [id, firstName, lastName, email, role, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [buyer, seller, admin]
+        status:
+          type: string
+          enum: [active, suspended]
+        adminRole:
+          type: string
+          nullable: true
+          enum: [super_admin, admin, moderator, delivery]
+        avatarUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [id, firstName, lastName, email, role, status]
+          properties:
+            id:
+              type: string
+              format: uuid
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+              format: email
+            role:
+              type: string
+              enum: [buyer, seller, admin]
+            status:
+              type: string
+              enum: [active, suspended]
+
+    UserProfileResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+
+    UserAddress:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        label: { type: string, maxLength: 100 }
+        recipientName: { type: string, maxLength: 200 }
+        phone: { type: string, maxLength: 30 }
+        street: { type: string }
+        district: { type: string, maxLength: 150 }
+        city: { type: string, maxLength: 150 }
+        region: { type: string, maxLength: 150 }
+        postalCode: { type: string, maxLength: 20 }
+        latitude: { type: number, format: double, nullable: true }
+        longitude: { type: number, format: double, nullable: true }
+        instructions: { type: string }
+        isDefault: { type: boolean }
+      required: [id, label, recipientName, phone, street, district, city, region, postalCode, instructions, isDefault]
+
+    PrivacySettingsResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [userId, profileVisibility, activityPersonalization, analyticsConsent, marketingConsent, dataSharing, createdAt, updatedAt]
+          properties:
+            userId:
+              type: string
+              format: uuid
+            profileVisibility:
+              type: string
+              enum: [private, public]
+            dataSharing:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    ConsentSettingsResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [userId, marketing, analytics, personnalisation]
+          properties:
+            userId:
+              type: string
+              format: uuid
+            marketing:
+              type: boolean
+            analytics:
+              type: boolean
+            personnalisation:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt: 
+              type: string
+              format: date-time
+
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+
+    ReadyResponse:
+      type: object
+      required: [status, checks]
+      properties:
+        status:
+          type: string
+          enum: [ready]
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+
+    NotReadyResponse:
+      type: object
+      required: [status, checks]
+      properties:
+        status:
+          type: string
+          enum: [not_ready]
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+
+    VersionResponse:
+      type: object
+      required: [service, version, commit]
+      properties:
+        service:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+
+    ValidationErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, details]
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR]
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      summary: Check service liveness
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /ready:
+    get:
+      tags: [System]
+      summary: Check service readiness
+      operationId: getReadiness
+      responses:
+        '200':
+          description: All readiness checks passed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+        '503':
+          description: At least one readiness check failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotReadyResponse'
+
+  /version:
+    get:
+      tags: [System]
+      summary: Get service version information
+      operationId: getVersion
+      responses:
+        '200':
+          description: Current service version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionResponse'
+
+  /metrics:
+    get:
+      tags: [System]
+      summary: Get Prometheus metrics
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /internal/users:
+    post:
+      tags: [User]
+      summary: Create a user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /internal/addresses:
+    get:
+      tags: [Internal]
+      summary: Get user addresses
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User addresses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserAddress'
+        '404':
+          description: User not found
+
+  /api/account/profile/{id}:
+    get:
+      tags: [Account]
+      summary: Get a user profile
+      operationId: getAccountProfile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/account/{id}:
+    patch:
+      tags: [Account]
+      summary: Update a user profile
+      operationId: updateAccountProfile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/account/privacy/{id}:
+    put:
+      tags: [Account]
+      summary: Update privacy settings
+      operationId: updatePrivacySettings
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacySettingsRequest'
+      responses:
+        '200':
+          description: Updated privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettingsResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/account/consent/{id}:
+    get:
+      tags: [Account]
+      summary: Get consent settings
+      operationId: getConsentSettings
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Consent settings without audit timestamps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentSettingsResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+    patch:
+      tags: [Account]
+      summary: Modidfy user consent settings
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Updated user Consent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentSettingsResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+
+  

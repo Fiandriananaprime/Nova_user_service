@@ -7,28 +7,15 @@ export class UserController {
     constructor ( private readonly UserService: UserService){}
 
     async createUser(request:FastifyRequest<{ Body: CreateUserDTO}>,reply:FastifyReply){
-        try {
             const user = await this.UserService.createUser(request.body);
 
-            return reply.status(200).send({
-                data:user
-            })
-        }
-        catch (error) {
-            if (error instanceof Error && error.message==="USER_ALREADY_EXISTS"){
-                return reply.status(409).send({
-                    error:{
-                        code:"USER_ALREADY_EXISTS",
-                        message: "User already exists"
-                    }
-                })
-            }
-            return reply.status(500).send({
-                error:{
-                    code:"INTERNAL_SERVER_ERROR",
-                    message: "Internal server error"
-                }
-            })
-        }
+            return reply.status(201).send(user)
+    }
+
+    async findUserAddresses(request: FastifyRequest<{Querystring:{userId: string}}>, reply:FastifyReply){
+        const userId = request.query.userId
+        const addresses = await this.UserService.findAddressesByUserId(userId)
+
+        return reply.status(200).send(addresses)
     }
 }

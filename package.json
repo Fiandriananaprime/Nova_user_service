@@ -3,7 +3,8 @@
     "@types/node": "^22.20.2",
     "dotenv": "^17.4.2",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "name": "nova_user_service",
   "version": "1.0.0",
@@ -11,7 +12,8 @@
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "@Fiandriananaprime/nova_api_type": "^1.1.2",
+    "@Fiandriananaprime/nova_api_type": "^1.1.5",
+    "@Fiandriananaprime/service-core": "^1.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "abstract-logging": "^2.0.1",
