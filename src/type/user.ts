@@ -17,3 +17,18 @@ export interface CreateAddress {
   instructions: string;
   isDefault?: boolean;
 }
+
+export interface UpdateAddress {
+  label?: string;
+  recipientName?: string;
+  phone?: string;
+  street?: string;
+  district?: string;
+  city?: string;
+  region?: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  instructions?: string;
+  isDefault?: boolean;
+}
