@@ -2,6 +2,8 @@ import type {FastifyReply, FastifyRequest} from "fastify";
 
 import { UserService } from "../service/user.service.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
+import { UnauthorizedError } from "../errorHandler/CredentialError.js";
+import type { CreateAddress } from "../type/user.js";
 
 export class UserController {
     constructor ( private readonly UserService: UserService){}
@@ -17,5 +19,15 @@ export class UserController {
         const addresses = await this.UserService.findAddressesByUserId(userId)
 
         return reply.status(200).send(addresses)
+    }
+
+    async addUserAddress(request: FastifyRequest<{Body: CreateAddress}>,reply: FastifyReply){
+        const userId = request.userId
+        const address = request.body;
+        if (!userId) throw new UnauthorizedError();
+
+        const createadAddress = await this.UserService.addUserAddress(userId,address);
+
+        return reply.status(201).send(createadAddress)
     }
 }

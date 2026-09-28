@@ -6,6 +6,7 @@ import { UserAlreadyExists, UserNotFoundError } from "../errorHandler/UserError.
 import { UserRepository } from "../repository/user.repository.js";
 import type { ConsentRepository } from "../repository/consent.repository.js";
 import type { PrivacyRepository } from "../repository/privacy.repository.js";
+import type { CreateAddress, userAddress } from "../type/user.js";
 
 export class UserService {
     constructor ( 
@@ -44,5 +45,14 @@ export class UserService {
 
         const addresses = this.UserRepository.getAddresses(userId);
         return addresses
+    }
+
+    async addUserAddress(userId: string,address: CreateAddress): Promise<userAddress>{
+        const userExist = await this.UserRepository.findById(userId)
+        if(!userExist) throw new UserNotFoundError()
+        
+        const createdAddress = this.UserRepository.addUserAddress(userId,address);
+        
+        return createdAddress
     }
 }

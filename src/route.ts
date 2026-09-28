@@ -38,5 +38,5 @@ export const routes = (app: FastifyInstance) => {
     // Routes
     accountRoutes(app, accountController, { prefix: "/api" });
     internalRoutes(app, userController, { prefix: "/internal" });
-    buyerRoutes(app, buyerController, { prefix: "/api/buyer" });
+    buyerRoutes(app, buyerController,userController, { prefix: "/api/buyer" });
 };
