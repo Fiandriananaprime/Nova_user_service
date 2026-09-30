@@ -21,6 +21,14 @@ export class UserController {
         return reply.status(200).send(addresses)
     }
 
+    async findCurrentUserAddresses(request: FastifyRequest, reply: FastifyReply){
+        const userId = request.userId
+        if(!userId) throw new UnauthorizedError()
+
+        const addresses = await this.UserService.findAddressesByUserId(userId)
+        return reply.status(200).send(addresses)
+    }
+
     async addUserAddress(request: FastifyRequest<{Body: CreateAddress}>,reply: FastifyReply){
         const userId = request.userId
         const address = request.body;
