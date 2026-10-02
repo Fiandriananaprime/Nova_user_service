@@ -1,6 +1,6 @@
 export const createUserSchema = {
   type: "object",
-  required: ["firstName", "lastName", "email"],
+  required: ["firstName", "lastName", "email", "phone"],
   properties: {
     firstName: {
       type: "string",
@@ -15,8 +15,19 @@ export const createUserSchema = {
     email: {
       type: "string",
       format: "email",
+      nullable: true,
+    },
+    phone: {
+      type: "string",
+      minLength: 1,
+      maxLength: 30,
+      nullable: true,
     },
   },
+  oneOf: [
+    { properties: { email: { type: "string", format: "email" } } },
+    { properties: { phone: { type: "string", minLength: 1, maxLength: 30 } } },
+  ],
   additionalProperties: false,
 } as const;
 

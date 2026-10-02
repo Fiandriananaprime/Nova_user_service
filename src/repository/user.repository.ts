@@ -17,17 +17,30 @@ export class UserRepository {
         })
     }
 
+    async findByPhone(phone: string) {
+        return prisma.user.findUnique({
+            where: { phone },
+        });
+    }
+
+    async deleteById(id: string) {
+        return prisma.user.delete({
+            where: { id },
+        });
+    }
+
     async createUser(
         tx: Prisma.TransactionClient,
         data: CreateUserDTO
     ) {
-        const { firstName, lastName, email } = data;
+        const { firstName, lastName, email, phone } = data;
 
         return tx.user.create({
             data: {
                 firstName,
                 lastName,
                 email,
+                phone,
             },
         });
     }

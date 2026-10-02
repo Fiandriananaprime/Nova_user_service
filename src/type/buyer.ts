@@ -29,7 +29,7 @@ export interface BuyerProfile extends BuyerPreferences {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  email: string | null;
   role: string;
   status: string;
 }

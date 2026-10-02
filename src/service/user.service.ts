@@ -2,6 +2,7 @@
 import { prisma } from "../database/prisma.js";
 import type { CreateUserDTO } from "../dto/userDto.js";
 import { AddressNotFound, UserAlreadyExists, UserNotFoundError } from "../errorHandler/UserError.js";
+import { AppError } from "../errorHandler/AppError.js";
 
 import { UserRepository } from "../repository/user.repository.js";
 import type { ConsentRepository } from "../repository/consent.repository.js";
@@ -16,10 +17,22 @@ export class UserService {
     ) {}
 
     async createUser(data:CreateUserDTO){
-        const existingUser = await this.UserRepository.findByEmail(data.email);
+        const existingUser = data.email
+            ? await this.UserRepository.findByEmail(data.email)
+            : data.phone
+                ? await this.UserRepository.findByPhone(data.phone)
+                : null;
 
         if(existingUser){
             throw new UserAlreadyExists;
+        }
+
+        if (!data.email && !data.phone) {
+            throw new AppError(
+                "VALIDATION_ERROR",
+                400,
+                "An email address or phone number is required",
+            );
         }
 
         return prisma.$transaction(async (tx) =>{
@@ -33,10 +46,15 @@ export class UserService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                phone: user.phone,
                 role: user.role,
                 status: user.status
             }
         })
+    }
+
+    async deleteUser(id: string) {
+        await this.UserRepository.deleteById(id);
     }
 
     async findAddressesByUserId(userId: string){

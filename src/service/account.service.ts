@@ -54,4 +54,11 @@ export class AccountService {
         return user;
     }
 
+    async findPrivacy(userId: string) {
+        const existingUser = await this.UserRepository.findById(userId);
+        if (!existingUser) throw new UserNotFoundError();
+
+        return this.PrivacyRepository.findPrivacyByUserId(userId);
+    }
+
 }

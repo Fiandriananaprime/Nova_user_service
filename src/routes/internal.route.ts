@@ -9,6 +9,7 @@ export const internalRoutes = async (
 ) => {
     app.register((router) => {
         router.post("/users",{schema:{body:createUserSchema}}, userController.createUser.bind(userController));
+        router.delete("/users/:id", userController.deleteUser.bind(userController));
         router.get("/addresses",userController.findUserAddresses.bind(userController),)
     }, options);
 }

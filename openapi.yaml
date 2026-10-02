@@ -15,15 +15,12 @@ tags:
   - name: System
     description: Service health and metadata endpoints
 components:
-  parameters:
-    UserId:
-      name: id
-      in: path
-      required: true
-      description: User UUID
-      schema:
-        type: string
-        format: uuid
+  securitySchemes:
+    gatewayUserContext:
+      type: apiKey
+      in: header
+      name: x-user-id
+      description: User UUID injected by the API Gateway after access-token validation. Clients must not set this header directly.
 
   responses:
     ValidationError:
@@ -49,7 +46,17 @@ components:
     CreateUserRequest:
       type: object
       additionalProperties: false
-      required: [firstName, lastName, email]
+      required: [firstName, lastName, email, phone]
+      oneOf:
+        - properties:
+            email:
+              type: string
+              format: email
+        - properties:
+            phone:
+              type: string
+              minLength: 1
+              maxLength: 30
       properties:
         firstName:
           type: string
@@ -62,6 +69,12 @@ components:
         email:
           type: string
           format: email
+          nullable: true
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+          nullable: true
 
     UpdateProfileRequest:
       type: object
@@ -93,9 +106,20 @@ components:
         dataSharing:
           type: boolean
 
+    ConsentSettingsRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        marketing:
+          type: boolean
+        analytics:
+          type: boolean
+        personalization:
+          type: boolean
+
     User:
       type: object
-      required: [id, firstName, lastName, email, role, status, createdAt, updatedAt]
+      required: [id, firstName, lastName, email, phone, role, status, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -107,6 +131,7 @@ components:
         email:
           type: string
           format: email
+          nullable: true
         phone:
           type: string
           nullable: true
@@ -132,28 +157,28 @@ components:
 
     UserResponse:
       type: object
-      required: [data]
+      required: [id, firstName, lastName, email, phone, role, status]
       properties:
-        data:
-          type: object
-          required: [id, firstName, lastName, email, role, status]
-          properties:
-            id:
-              type: string
-              format: uuid
-            firstName:
-              type: string
-            lastName:
-              type: string
-            email:
-              type: string
-              format: email
-            role:
-              type: string
-              enum: [buyer, seller, admin]
-            status:
-              type: string
-              enum: [active, suspended]
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [buyer, seller, admin]
+        status:
+          type: string
+          enum: [active, suspended]
 
     UserProfileResponse:
       type: object
@@ -186,6 +211,7 @@ components:
       properties:
         data:
           type: object
+          nullable: true
           required: [userId, profileVisibility, activityPersonalization, analyticsConsent, marketingConsent, dataSharing, createdAt, updatedAt]
           properties:
             userId:
@@ -194,6 +220,12 @@ components:
             profileVisibility:
               type: string
               enum: [private, public]
+            activityPersonalization:
+              type: boolean
+            analyticsConsent:
+              type: boolean
+            marketingConsent:
+              type: boolean
             dataSharing:
               type: boolean
             createdAt:
@@ -209,7 +241,7 @@ components:
       properties:
         data:
           type: object
-          required: [userId, marketing, analytics, personnalisation]
+          required: [userId, marketing, analytics, personalization, createdAt, updatedAt]
           properties:
             userId:
               type: string
@@ -218,7 +250,7 @@ components:
               type: boolean
             analytics:
               type: boolean
-            personnalisation:
+            personalization:
               type: boolean
             createdAt:
               type: string
@@ -413,13 +445,13 @@ paths:
         '404':
           description: User not found
 
-  /api/account/profile/{id}:
+  /api/account/profile:
     get:
       tags: [Account]
-      summary: Get a user profile
+      summary: Get the authenticated user's profile
       operationId: getAccountProfile
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      security:
+        - gatewayUserContext: []
       responses:
         '200':
           description: User profile
@@ -427,18 +459,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Gateway user context is missing
         '404':
           $ref: '#/components/responses/NotFoundError'
         '500':
           $ref: '#/components/responses/InternalError'
-
-  /api/account/{id}:
     patch:
       tags: [Account]
-      summary: Update a user profile
+      summary: Update the authenticated user's profile
       operationId: updateAccountProfile
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      security:
+        - gatewayUserContext: []
       requestBody:
         required: true
         content:
@@ -454,18 +486,39 @@ paths:
                 $ref: '#/components/schemas/UserProfileResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Gateway user context is missing
         '404':
           $ref: '#/components/responses/NotFoundError'
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /api/account/privacy/{id}:
+  /api/account/privacy:
+    get:
+      tags: [Account]
+      summary: Get the authenticated user's privacy settings
+      operationId: getPrivacySettings
+      security:
+        - gatewayUserContext: []
+      responses:
+        '200':
+          description: Privacy settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettingsResponse'
+        '401':
+          description: Gateway user context is missing
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
     put:
       tags: [Account]
-      summary: Update privacy settings
+      summary: Update the authenticated user's privacy settings
       operationId: updatePrivacySettings
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      security:
+        - gatewayUserContext: []
       requestBody:
         required: true
         content:
@@ -481,18 +534,20 @@ paths:
                 $ref: '#/components/schemas/PrivacySettingsResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Gateway user context is missing
         '404':
           $ref: '#/components/responses/NotFoundError'
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /api/account/consent/{id}:
+  /api/account/consents:
     get:
       tags: [Account]
-      summary: Get consent settings
+      summary: Get the authenticated user's consent settings
       operationId: getConsentSettings
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      security:
+        - gatewayUserContext: []
       responses:
         '200':
           description: Consent settings without audit timestamps
@@ -500,17 +555,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsentSettingsResponse'
+        '401':
+          description: Gateway user context is missing
         '404':
           $ref: '#/components/responses/NotFoundError'
         '500':
           $ref: '#/components/responses/InternalError'
 
-
     patch:
       tags: [Account]
-      summary: Modidfy user consent settings
-      parameters:
-        - $ref: '#/components/parameters/UserId'
+      summary: Update the authenticated user's consent settings
+      operationId: updateConsentSettings
+      security:
+        - gatewayUserContext: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentSettingsRequest'
       responses:
         '200':
           description: Updated user Consent
@@ -520,6 +583,8 @@ paths:
                 $ref: '#/components/schemas/ConsentSettingsResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
+        '401':
+          description: Gateway user context is missing
         '404':
           $ref: '#/components/responses/NotFoundError'
         '500':

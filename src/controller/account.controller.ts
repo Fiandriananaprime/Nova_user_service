@@ -2,34 +2,46 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { AccountService } from "../service/account.service.js";
 import type { updateRequest } from "../dto/userDto.js";
 import type { privacyDto, consentDto } from "../dto/settingDto.js";
+import { UnauthorizedError } from "../errorHandler/CredentialError.js";
 
 export class AccountController {
     constructor (private readonly AccountService:AccountService){}
 
-    async findAccountById(request:FastifyRequest<{Params: {id: string}}>,reply:FastifyReply){
-            const account = await this.AccountService.findCurrentAccount(request.params.id);
-            return reply.status(200).send({data:account});        
-    }
-
-    async updateById(request:FastifyRequest<{ Params:{id:string}, Body:updateRequest }>,reply:FastifyReply){
-            const account = await this.AccountService.updateById(request.params.id,request.body);
+    async findCurrentAccount(request:FastifyRequest,reply:FastifyReply){
+            if (!request.userId) throw new UnauthorizedError();
+            const account = await this.AccountService.findCurrentAccount(request.userId);
             return reply.status(200).send({data:account});
     }
 
-    async updatePrivacyById(request:FastifyRequest<{Params:{id:string}, Body:privacyDto}>,reply:FastifyReply){
-            const account = await this.AccountService.updatePrivacy(request.params.id,request.body);
+    async updateCurrentAccount(request:FastifyRequest<{ Body:updateRequest }>,reply:FastifyReply){
+            if (!request.userId) throw new UnauthorizedError();
+            const account = await this.AccountService.updateById(request.userId,request.body);
+            return reply.status(200).send({data:account});
+    }
+
+    async getPrivacy(request:FastifyRequest,reply:FastifyReply){
+            if (!request.userId) throw new UnauthorizedError();
+            const privacy = await this.AccountService.findPrivacy(request.userId);
+            return reply.status(200).send({data:privacy});
+    }
+
+    async updatePrivacy(request:FastifyRequest<{Body:privacyDto}>,reply:FastifyReply){
+            if (!request.userId) throw new UnauthorizedError();
+            const account = await this.AccountService.updatePrivacy(request.userId,request.body);
             return reply.status(200).send({data:account});
     }
     
-    async findAccountConsentById(request:FastifyRequest<{Params:{id:string}}>, reply: FastifyReply) {
-                const privacy = await this.AccountService.findAccountConsentById(request.params.id);
+    async findAccountConsent(request:FastifyRequest, reply:FastifyReply) {
+                if (!request.userId) throw new UnauthorizedError();
+                const consent = await this.AccountService.findAccountConsentById(request.userId);
 
-        return reply.status(200).send({data:privacy});
+        return reply.status(200).send({data:consent});
     }
 
 
-    async updateConsentById(request:FastifyRequest<{Params:{id:string},Body:consentDto}>, reply:FastifyReply){
-        const consent = await this.AccountService.updateConsent(request.params.id,request.body);
+    async updateConsent(request:FastifyRequest<{Body:consentDto}>, reply:FastifyReply){
+        if (!request.userId) throw new UnauthorizedError();
+        const consent = await this.AccountService.updateConsent(request.userId,request.body);
 
         return reply.status(200).send({data:consent})
     }
