@@ -39,6 +39,10 @@ export class UserService {
         })
     }
 
+    async deleteUser(id: string) {
+        await this.UserRepository.deleteById(id);
+    }
+
     async findAddressesByUserId(userId: string){
         const user = this.UserRepository.findById(userId);
         if(!user) throw new UserNotFoundError();

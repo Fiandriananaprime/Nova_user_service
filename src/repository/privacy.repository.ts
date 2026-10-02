@@ -28,4 +28,10 @@ export class PrivacyRepository {
             },
         });
     }
+
+    async findPrivacyByUserId(userId: string) {
+        return prisma.privacySettings.findUnique({
+            where: { userId },
+        });
+    }
 }

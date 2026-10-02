@@ -9,10 +9,11 @@ export const accountRoutes =  (
     options: { prefix: string },
 ) => {
     app.register((router) => {
-        router.get("/account/profile/:id", accountController.findAccountById.bind(accountController));
-        router.patch("/account/:id",{schema:{body:updateProfile}}, accountController.updateById.bind(accountController))
-        router.put("/account/privacy/:id",{schema:{body:accountPrivacy}}, accountController.updatePrivacyById.bind(accountController))
-        router.get("/account/consent/:id",accountController.findAccountConsentById.bind(accountController))
-        router.patch("/account/consent/:id",accountController.updateConsentById.bind(accountController))
+        router.get("/account/profile", accountController.findCurrentAccount.bind(accountController));
+        router.patch("/account/profile",{schema:{body:updateProfile}}, accountController.updateCurrentAccount.bind(accountController));
+        router.get("/account/privacy", accountController.getPrivacy.bind(accountController))
+        router.put("/account/privacy",{schema:{body:accountPrivacy}}, accountController.updatePrivacy.bind(accountController))
+        router.get("/account/consents",accountController.findAccountConsent.bind(accountController))
+        router.patch("/account/consents",accountController.updateConsent.bind(accountController))
     }, options);
 }

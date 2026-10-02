@@ -14,6 +14,11 @@ export class UserController {
             return reply.status(201).send(user)
     }
 
+    async deleteUser(request:FastifyRequest<{ Params: { id: string }}>, reply:FastifyReply) {
+        await this.UserService.deleteUser(request.params.id);
+        return reply.status(204).send();
+    }
+
     async findUserAddresses(request: FastifyRequest<{Querystring:{userId: string}}>, reply:FastifyReply){
         const userId = request.query.userId
         const addresses = await this.UserService.findAddressesByUserId(userId)

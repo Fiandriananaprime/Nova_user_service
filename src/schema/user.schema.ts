@@ -1,6 +1,6 @@
 export const createUserSchema = {
   type: "object",
-  required: ["firstName", "lastName", "email"],
+  required: ["firstName", "lastName"],
   properties: {
     firstName: {
       type: "string",
@@ -16,7 +16,16 @@ export const createUserSchema = {
       type: "string",
       format: "email",
     },
+    phone: {
+      type: "string",
+      minLength: 1,
+      maxLength: 30,
+    },
   },
+  anyOf: [
+    { required: ["email"] },
+    { required: ["phone"] },
+  ],
   additionalProperties: false,
 } as const;
 

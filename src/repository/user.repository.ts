@@ -17,6 +17,12 @@ export class UserRepository {
         })
     }
 
+    async deleteById(id: string) {
+        return prisma.user.delete({
+            where: { id },
+        });
+    }
+
     async createUser(
         tx: Prisma.TransactionClient,
         data: CreateUserDTO
